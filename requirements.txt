@@ -1,0 +1,14 @@
+flask
+gunicorn
+sentence-transformers
+torch
+transformers
+PyMuPDF
+werkzeug
+sentence-transformers==2.2.2
+nltk==3.6.3
+PyMuPDF
+transformers
+torch==2.0.1
+pyspellchecker
+python-dotenv

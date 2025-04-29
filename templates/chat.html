@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gov Bot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      width: 100%;
+      max-width: 500px;
+      height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background-color: #00796B;
+      color: white;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .chat-header .title {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .chat-header .status {
+      opacity: 0.95;
+      font-size: 13px;
+    }
+
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      background: #f6f6f6;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 16px;
+      margin-bottom: 10px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .user {
+      align-self: flex-end;
+      background-color: #dcf8c6;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background-color: #ffffff;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0px 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .input-container {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background: #ffffff;
+      border-top: 1px solid #ddd;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    select, input[type="text"] {
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 16px;
+      border: 1px solid #ccc;
+      outline: none;
+      height: 36px;
+    }
+
+    select {
+      width: 120px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-label {
+      padding: 6px 10px;
+      background: #f0f0f0;
+      border-radius: 14px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 18px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    @media screen and (max-width: 600px) {
+      .chat-box {
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .input-container {
+        flex-direction: column;
+        gap: 6px;
+        align-items: stretch;
+      }
+
+      select, input[type="text"], .file-label, button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-box">
+
+  <!-- 🧠 HEADER -->
+  <div class="chat-header">
+    <div class="title">🤖 Welcome to Gov Bot</div>
+    <div class="status">
+      👤 User: <span id="user-name">{{ session['username'] }}</span> |
+      📌 Task: <span id="current-task">None</span>
+    </div>
+  </div>
+
+  <!-- 💬 CHAT -->
+  <div class="chat-container" id="chat-container"></div>
+
+  <!-- 🔽 INPUTS -->
+  <div class="input-container">
+    <select id="task-menu">
+      <option value="">Task</option>
+      <option value="1">Download</option>
+      <option value="2">Access DB</option>
+      <option value="4">Summarize PDF</option>
+      <option value="6">Field Mapping</option>
+      <option value="0">Exit</option>
+    </select>
+
+    <input type="text" id="message-input" placeholder="Type your message...">
+    <label for="file-input" class="file-label">📎</label>
+    <input type="file" id="file-input">
+    <button onclick="sendMessage()">➤</button>
+  </div>
+
+</div>
+
+<script>
+function sendMessage() {
+  const taskMenu = document.getElementById("task-menu");
+  const taskNameSpan = document.getElementById("current-task");
+  const messageInput = document.getElementById("message-input");
+  const fileInput = document.getElementById("file-input");
+
+  const selectedTask = taskMenu.value;
+  const taskText = taskMenu.options[taskMenu.selectedIndex].text;
+  const message = messageInput.value.trim();
+
+  if (selectedTask && message === "" && fileInput.files.length === 0) {
+    taskNameSpan.textContent = taskText;
+    appendMessage(`🧭 Task selected: ${selectedTask}`, 'user');
+    fetch('/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: selectedTask})
+    })
+    .then(res => res.json())
+    .then(data => appendMessage(data.response, 'bot'));
+    taskMenu.value = "";
+  }
+  else if (fileInput.files.length > 0) {
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    appendMessage(`📄 Uploaded: ${fileInput.files[0].name}`, 'user');
+
+    fetch('/chat', { method: 'POST', body: formData })
+      .then(res => res.json())
+      .then(data => appendMessage(data.response, 'bot'));
+
+    fileInput.value = "";
+  }
+  else if (message !== "") {
+    appendMessage(message, 'user');
+    fetch('/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: message})
+    })
+    .then(res => res.json())
+    .then(data => appendMessage(data.response, 'bot'));
+    messageInput.value = "";
+  }
+}
+
+function appendMessage(text, sender) {
+  const container = document.getElementById("chat-container");
+  const msgDiv = document.createElement("div");
+  msgDiv.className = `message ${sender}`;
+  msgDiv.textContent = text;
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+</script>
+
+</body>
+</html>

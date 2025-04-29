@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | Gov Bot</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-box {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-box h2 {
+      margin-bottom: 25px;
+      font-size: 22px;
+      text-align: center;
+      color: #333;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .bot-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #00796B;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    @media screen and (max-width: 480px) {
+      .login-box {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-box">
+  <div class="bot-title">🤖 Welcome to Gov Bot</div>
+  <div class="subtitle">Secure Login Portal</div>
+
+  {% if error %}
+    <div class="error">❌ {{ error }}</div>
+  {% endif %}
+
+  <form method="POST">
+    <div class="input-group">
+      <label for="username">👤 Username</label>
+      <input type="text" name="username" id="username" required>
+    </div>
+
+    <div class="input-group">
+      <label for="password">🔒 Password</label>
+      <input type="password" name="password" id="password" required>
+    </div>
+
+    <input type="submit" value="Login">
+  </form>
+</div>
+
+</body>
+</html>
